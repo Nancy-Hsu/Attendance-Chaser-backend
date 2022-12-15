@@ -10,7 +10,7 @@ module.exports = {
       },
       employee_id: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       account: {
         allowNull: false,

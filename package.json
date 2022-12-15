@@ -19,5 +19,8 @@
     "passport": "^0.4.1",
     "sequelize": "^5.21.13",
     "sequelize-cli": "^5.5.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0"
   }
 }
