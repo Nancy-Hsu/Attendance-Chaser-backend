@@ -59,6 +59,10 @@ const userController = {
     const user = await User.findByPk(userId, { attributes: { exclude: ['password'] }})
     const userData = user.toJSON()
     console.log(userData)
+    res.json({
+      status: 'success',
+      data: userData
+    })
   },
 }
 module.exports = userController
