@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true,
   });
   Date.associate = function(models) {
-    // associations can be defined here
+    Date.hasMany(models.Attendance, { foreignKey: 'DateId' })
   };
   return Date;
 };
