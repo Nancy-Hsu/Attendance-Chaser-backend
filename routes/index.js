@@ -1,14 +1,20 @@
+require('express-async-errors')
 const express = require('express')
 const router = express.Router()
 const { apiErrorHandler } = require('../middleware/error-handler')
+const { authenticatedUser } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
+const attendController = require('../controllers/attend-controller')
+
 // const passport = require('../../config/passport')
 
-router.post('/login', userController.logIn)
+router.post('/users/login', userController.logIn)
 
-router.put('/user/:userId', userController.putUser)
+router.put('/users/:userId', userController.putUser)
+router.get('/users/:userId', userController.getUser)
 
-router.get('/user/:userId', userController.getUser)
+router.post('/attendances', authenticatedUser, attendController.postAttendance)
+
 
 router.get('/', (req, res) => {
   res.json({

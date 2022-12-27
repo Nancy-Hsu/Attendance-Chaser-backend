@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-require('express-async-errors');
-const usersServices = require('../services/user-services')
 const { User } = require('../models')
 
 
@@ -19,10 +17,8 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       return res.json({
         status: 'success',
-        data: {
-          token,
-          user: userData
-        }
+        token,
+        user: userData
       })
     } catch (err) {
       next(err)
@@ -40,15 +36,15 @@ const userController = {
     if (newPassword !== newPasswordCheck) {
       throw new Error('新密碼與確認密碼不相同')
     }
-    const user = await User.findByPk( userId )
+    const user = await User.findByPk(userId)
 
     if (!user || !bcrypt.compareSync(oldPassword, user.password)) throw new Error('密碼有誤！')
 
     const result = await user.update({
       password: bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10), null)
-    }) 
+    })
 
-    result ? res.status(200).json({
+    result ? res.json({
       status: 'success',
       message: 'change succeeded !'
     }) : res.send(500)
@@ -56,12 +52,11 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     const { userId } = req.params
-    const user = await User.findByPk(userId, { attributes: { exclude: ['password'] }})
+    const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } })
     const userData = user.toJSON()
-    console.log(userData)
     res.json({
       status: 'success',
-      data: userData
+      user: userData
     })
   },
 }
