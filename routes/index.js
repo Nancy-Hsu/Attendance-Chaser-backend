@@ -10,8 +10,8 @@ const attendController = require('../controllers/attend-controller')
 
 router.post('/users/login', userController.logIn)
 
-router.put('/users/:userId', userController.putUser)
-router.get('/users/:userId', userController.getUser)
+router.put('/users/:userId', authenticatedUser, userController.putUser)
+router.get('/users/:userId', authenticatedUser, userController.getUser)
 
 router.post('/attendances', authenticatedUser, attendController.postAttendance)
 

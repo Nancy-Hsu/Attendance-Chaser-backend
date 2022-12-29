@@ -20,11 +20,11 @@
     "operatorsAliases": false
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "admin",
+    "password": "password",
+    "database": "attenddb",
+    "host": "attenddb.c1arpaeazbo3.ap-northeast-1.rds.amazonaws.com",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "port": "3306"
   }
 }
