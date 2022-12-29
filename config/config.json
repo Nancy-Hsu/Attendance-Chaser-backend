@@ -5,10 +5,10 @@
     "database": "attendance_chaser",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "timezone":"+08:00",
-     "dialectOptions": {
-    "dateStrings": true,
-    "typeCast": true
+    "timezone": "+08:00",
+    "dialectOptions": {
+      "dateStrings": true,
+      "typeCast": true
     }
   },
   "test": {
