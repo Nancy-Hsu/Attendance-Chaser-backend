@@ -27,9 +27,19 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
+      login_wrong_times: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        default: 0
+      },
       is_remote: {
         allowNull: false,
         type: Sequelize.BOOLEAN
+      },
+      is_delete: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        default: false
       },
       created_at: {
         allowNull: false,

@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const sequelize = require('sequelize')
+const { Op } = require('sequelize')
+const { User, Attendance,  Date} = require('../models')
 
 
 const userController = {
@@ -10,7 +12,7 @@ const userController = {
       throw new Error('these two filed are required')
     }
     const user = await User.findOne({ where: { account } })
-    if (!user || !bcrypt.compareSync(password, user.password)) throw new Error('password or account incorrect!')
+    if (!user) throw new Error('password or account incorrect!')
     const userData = user.toJSON()
     delete userData.password
     try {
@@ -59,5 +61,46 @@ const userController = {
       user: userData
     })
   },
+  getCurrentUser : async(req, res, next) => {
+    const currentUser = req.user.toJSON()
+    delete currentUser.updatedAt
+    delete currentUser.password
+    res.json({
+      status: 'success',
+      currentUser
+    })
+},
+  getUserAbsence: async(req, res, next) => {
+    const user = req.user.toJSON()
+    const { userId } = req.params
+
+    if (user.id.toString() !== userId) throw new Error ('您沒有權限')
+
+    const data = await Attendance.findAll({
+      order: [['created_at', 'DESC']],
+      include: [
+        { model: Date, where: { is_holiday: false }, attributes: [] }
+      ],
+      attributes: {
+        include: [[
+          sequelize.literal('timestampdiff(hour, start_time, end_time )'), 'workHour']]
+      },
+
+      where: {
+        [Op.and]:
+        [{ UserId: userId },
+        { where: sequelize.where(sequelize.fn("month", sequelize.col("Attendance.created_at")), 1) }],
+      },
+      raw: true 
+    })
+    const absenceData = data.filter(item => {
+      if (!item.workHour || item.workHour < 9) return item
+    })
+
+    res.json({
+      status: 'success',
+      absenceData
+    })
+  }
 }
 module.exports = userController

@@ -15,10 +15,10 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       start_time: {
-        type: Sequelize.TIME
+        type: Sequelize.DATE
       },
       end_time: {
-        type: Sequelize.TIME
+        type: Sequelize.DATE
       },
       created_at: {
         allowNull: false,

@@ -12,6 +12,8 @@ router.post('/users/login', userController.logIn)
 
 router.put('/users/:userId', authenticatedUser, userController.putUser)
 router.get('/users/:userId', authenticatedUser, userController.getUser)
+router.get('/users/:userId/absence', authenticatedUser, userController.getUserAbsence)
+router.get('/currentUser', authenticatedUser, userController.getCurrentUser)
 
 router.post('/attendances', authenticatedUser, attendController.postAttendance)
 

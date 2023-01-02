@@ -6,7 +6,9 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     employeeId: DataTypes.STRING,
     name: DataTypes.STRING,
-    isRemote: DataTypes.BOOLEAN
+    loginWrongTimes: DataTypes.INTEGER,
+    isRemote: DataTypes.BOOLEAN,
+    isDelete: DataTypes.BOOLEAN,
   }, {
     sequelize,
     modelName: 'User',

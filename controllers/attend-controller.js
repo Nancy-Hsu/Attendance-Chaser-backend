@@ -19,42 +19,45 @@ dayjs.tz.setDefault(process.env.VITE_TIME_ZONE)
 const attendController = {
   postAttendance: async (req, res, next) => {
     const user = req.user.toJSON()
+    console.log(user)
+    //判斷距離
     if (!user.isRemote) {
       const origin = {
         lat: req.body.lat,
         lng: req.body.lng
       }
-
       const company = {
         lat: 25.05758954887687, 
         lng: 121.61231323665174
       }
       const distance = distanceDiff(origin, company)
-      if (distance > gpsRange) throw new Error('您離公司還太遠了！')
+
+      if (distance > gpsRange) throw new Error(`您離公司還有 ${distance} 公尺！飛毛腿快走!`)
     }
 
     // 擷取日期與時間
     let today = req.body.timeStamp
-    const time = dayjs(today).format(timeFormat)
-
+    // const time = dayjs(today).format(timeFormat)
+   
     // 判斷換日線
     if ((dayjs(today).hour() >= crossingStartHour) && (dayjs(today).hour() <= crossingEndHour)) {
-      today = dayjs(today).subtract(1, 'day').format(yearFormat)
-    } else {
-      today = dayjs(today).format(yearFormat)
-    }
-  
-    const date = await Date.findOne({ where: { date: today } })
-    if (!date) return
+      today = dayjs(today).subtract(1, 'day')
+    } 
+    
+    const todayFormat = dayjs(today).format(yearFormat)
+    //反查日期與使用者
+    const [date, userIsTrue] = await Promise.all([Date.findOne({ where: { date: todayFormat } }), User.findByPk(user.id)])
+    if (!userIsTrue) throw new Error('沒有此使用者  !')
+    if (!date) throw new Error('日期有誤!')
     //新增打卡紀錄
     const [record, created] = await Attendance.findOrCreate({
       where: { UserId: user.id, DateId: date.id },
       defaults: {
-        startTime: time
+        startTime: today
       }
     })
     if (!created) {
-      record.endTime = time
+      await record.update({ endTime: today })
     }
     res.json({
       status: 'success',

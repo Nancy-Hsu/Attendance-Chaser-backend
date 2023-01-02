@@ -3,8 +3,8 @@ module.exports = (sequelize, DataTypes) => {
   const Attendance = sequelize.define('Attendance', {
     UserId: DataTypes.INTEGER,
     DateId: DataTypes.INTEGER,
-    startTime: DataTypes.TIME,
-    endTime: DataTypes.TIME
+    startTime: DataTypes.DATE,
+    endTime: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Attendance',
