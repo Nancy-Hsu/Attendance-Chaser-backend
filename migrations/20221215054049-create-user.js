@@ -18,7 +18,8 @@ module.exports = {
       },
       password: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'titaner'
       },
       email: {
         type: Sequelize.STRING
@@ -28,18 +29,18 @@ module.exports = {
         type: Sequelize.STRING
       },
       login_wrong_times: {
-        allowNull: false,
         type: Sequelize.INTEGER,
-        default: 0
+        defaultValue: '0'
       },
       is_remote: {
         allowNull: false,
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       is_delete: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       created_at: {
         allowNull: false,

@@ -7,10 +7,7 @@ const timezone = require('dayjs/plugin/timezone')
 const crossingStartHour = 00
 const crossingEndHour = 05
 const yearFormat = 'YYYYMMDD'
-const timeFormat = 'HH:mm'
 const gpsRange = 400
-// const { Client } = require('@googlemaps/google-maps-services-js')
-// const client = new Client({})
 
 dayjs.extend(utc)
 dayjs.extend(timezone)

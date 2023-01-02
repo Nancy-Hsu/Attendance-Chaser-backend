@@ -1,18 +1,52 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const dayjs = require('dayjs')
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
-const { User, Attendance,  Date} = require('../models')
+const { User, Attendance, Date } = require('../models')
+const loginWrongLimit = 5
 
 
 const userController = {
   logIn: async (req, res, next) => {
     const { account, password } = req.body
+    // 檢查欄位
     if (!account || !password) {
       throw new Error('these two filed are required')
     }
     const user = await User.findOne({ where: { account } })
+    // 檢查帳號
     if (!user) throw new Error('password or account incorrect!')
+    // 檢查帳號是否上鎖
+    if (user.loginWrongTimes >= 5) {
+      throw new Error('帳號已上鎖，請 30 分鐘後再試！')
+    }
+    //密碼錯誤開始累計次數
+    if (!bcrypt.compareSync(password, user.password)) {
+      user.loginWrongTimes += 1
+      const updatedUser = await user.save()
+      const { loginWrongTimes } = updatedUser
+      // 當下是第五次則上鎖並計時
+      if (loginWrongTimes >= 5) {
+        setTimeout(async () => {
+          result.loginWrongTimes = '0'
+          await result.save()
+        }, 1800000)
+        throw new Error('帳號已上鎖，請 30 分鐘後再試')
+      }
+      res.json({
+        status: 'warning',
+        msg: `密碼已錯誤 ${loginWrongTimes} 次，達 ${loginWrongLimit} 次將限制帳號`,
+        loginWrongTimes
+      })
+    }
+    // 若有殘留次數會再一天後消失
+    if (user.loginWrongTimes) {
+      setTimeout(async () => {
+        user.loginWrongTimes = '0'
+        await user.save()
+      }, 86400000)
+    }
     const userData = user.toJSON()
     delete userData.password
     try {
@@ -61,7 +95,7 @@ const userController = {
       user: userData
     })
   },
-  getCurrentUser : async(req, res, next) => {
+  getCurrentUser: async (req, res, next) => {
     const currentUser = req.user.toJSON()
     delete currentUser.updatedAt
     delete currentUser.password
@@ -69,12 +103,13 @@ const userController = {
       status: 'success',
       currentUser
     })
-},
-  getUserAbsence: async(req, res, next) => {
+  },
+  getUserAbsence: async (req, res, next) => {
     const user = req.user.toJSON()
     const { userId } = req.params
 
-    if (user.id.toString() !== userId) throw new Error ('您沒有權限')
+    if (user.id.toString() !== userId) throw new Error('您沒有權限')
+    const currentMonth = dayjs().month()+1
 
     const data = await Attendance.findAll({
       order: [['created_at', 'DESC']],
@@ -88,10 +123,19 @@ const userController = {
 
       where: {
         [Op.and]:
-        [{ UserId: userId },
-        { where: sequelize.where(sequelize.fn("month", sequelize.col("Attendance.created_at")), 1) }],
+          [{ UserId: userId },
+          {
+            [Op.or]: [
+              {
+              where: sequelize.where(sequelize.fn("month", sequelize.col("Attendance.start_time")), currentMonth)
+            },
+            {
+              where: sequelize.where(sequelize.fn("month", sequelize.col("Attendance.start_time")), currentMonth - 1 || 12  ),
+            }
+          ]
+          }],
       },
-      raw: true 
+      raw: true
     })
     const absenceData = data.filter(item => {
       if (!item.workHour || item.workHour < 9) return item
