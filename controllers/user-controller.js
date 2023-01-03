@@ -62,7 +62,10 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     // PUT /api/user/:userId
+    const currentUser = req.user.toJSON()
     const { userId } = req.params
+
+    if (currentUser.id.toString() !== userId) throw new Error('您沒有權限')
 
     const { oldPassword, newPassword, newPasswordCheck } = req.body
     if (!oldPassword || !newPassword || !newPasswordCheck) {
