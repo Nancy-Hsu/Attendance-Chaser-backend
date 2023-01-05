@@ -29,8 +29,8 @@ const userController = {
       // 當下是第五次則上鎖並計時
       if (loginWrongTimes >= 5) {
         setTimeout(async () => {
-          result.loginWrongTimes = '0'
-          await result.save()
+          user.loginWrongTimes = '0'
+          await user.save()
         }, 1800000)
         throw new Error('帳號已上鎖，請 30 分鐘後再試')
       }

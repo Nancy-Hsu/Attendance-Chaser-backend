@@ -16,7 +16,6 @@ dayjs.tz.setDefault(process.env.VITE_TIME_ZONE)
 const attendController = {
   postAttendance: async (req, res, next) => {
     const user = req.user.toJSON()
-    console.log(user)
     //判斷距離
     if (!user.isRemote) {
       const origin = {
@@ -33,32 +32,40 @@ const attendController = {
     }
 
     // 擷取日期與時間
-    let today = req.body.timeStamp
-    // const time = dayjs(today).format(timeFormat)
+    let { timeStamp } = req.body
+
+    if (!timeStamp) throw new Error('沒有時間')
+    let localTime = dayjs.tz(timeStamp, "Asia/Taipei")
    
     // 判斷換日線
-    if ((dayjs(today).hour() >= crossingStartHour) && (dayjs(today).hour() <= crossingEndHour)) {
-      today = dayjs(today).subtract(1, 'day')
+    if ((localTime.hour() >= crossingStartHour) && (localTime.hour() < crossingEndHour)) {
+      localTime = localTime.subtract(1, 'day')
     } 
-    
-    const todayFormat = dayjs(today).format(yearFormat)
+
+    const todayFormat = localTime.format(yearFormat)
+
     //反查日期與使用者
     const [date, userIsTrue] = await Promise.all([Date.findOne({ where: { date: todayFormat } }), User.findByPk(user.id)])
-    if (!userIsTrue) throw new Error('沒有此使用者  !')
+    if (!userIsTrue) throw new Error('沒有此使用者 !')
     if (!date) throw new Error('日期有誤!')
     //新增打卡紀錄
     const [record, created] = await Attendance.findOrCreate({
       where: { UserId: user.id, DateId: date.id },
       defaults: {
-        startTime: today
+        startTime: timeStamp
       }
     })
-    if (!created) {
-      await record.update({ endTime: today })
+
+    
+    if (!created && record.startTime !== null ) {
+
+      if (dayjs(timeStamp).isBefore(dayjs(record.startTime)))  throw new Error ('已經打過卡')
+      await record.update({ endTime: timeStamp })
     }
-    res.json({
+    return res.json({
       status: 'success',
-      msg: '打卡成功！'
+      msg: '打卡成功！',
+      record
     })
   }
 }

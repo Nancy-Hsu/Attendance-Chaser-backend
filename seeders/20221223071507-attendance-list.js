@@ -11,8 +11,8 @@ module.exports = {
         data.push({
         User_id: user.id,
         Date_id: workDay.id,
-        start_time: workDay.date + ' 08:00',
-        end_time: workDay.date + ' 18:00',
+        start_time: workDay.date + ' 00:00',
+        end_time: workDay.date + ' 10:00',
         created_at: workDay.date,
         updated_at: workDay.date
       })))
