@@ -112,42 +112,46 @@ const userController = {
     const { userId } = req.params
 
     if (user.id.toString() !== userId) throw new Error('您沒有權限')
-    const currentMonth = dayjs().month()+1
+    const workTime = 9
+    const currentYear = dayjs().year()
+    const currentMonth = dayjs().month() + 1
+    const startOfDay = dayjs().startOf('month').format('YYYYMMDD')
+    const endOfDay = dayjs().format('YYYYMMDD')
 
-    const data = await Attendance.findAll({
-      order: [['created_at', 'DESC']],
-      include: [
-        { model: Date, where: { is_holiday: false }, attributes: [] }
-      ],
-      attributes: {
-        include: [[
-          sequelize.literal('timestampdiff(hour, start_time, end_time )'), 'workHour']]
-      },
-
+    const data = await Date.findAll({
+      order: [['date', 'DESC']],
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       where: {
-        [Op.and]:
-          [{ UserId: userId },
-          {
-            [Op.or]: [
-              {
-              where: sequelize.where(sequelize.fn("month", sequelize.col("Attendance.start_time")), currentMonth)
-            },
-            {
-              where: sequelize.where(sequelize.fn("month", sequelize.col("Attendance.start_time")), currentMonth - 1 || 12  ),
-            }
-          ]
-          }],
+        [Op.and]: [{ is_holiday: false },
+        { date: sequelize.where(sequelize.fn('YEAR', sequelize.col('date')), currentYear) },
+        {
+          [Op.or]: [
+            { date: { [Op.between]: [startOfDay, endOfDay] }},
+            { date: sequelize.where(sequelize.fn('month', sequelize.col('date')), currentMonth - 1) }]
+        }
+        ]
       },
-      raw: true
+      include: [{
+        model: Attendance, where: { UserId: userId }, required: false,
+        attributes: {
+          include: [[
+            sequelize.literal('timestampdiff(hour, start_time, end_time )'), 'workHour'],
+          ],
+          exclude: ['createdAt', 'updatedAt', 'DateId'],
+        }
+      },],
+      raw: true,
+      nest: true
     })
+
     const absenceData = data.filter(item => {
-      if (!item.workHour || item.workHour < 9) return item
+      if (!item.Attendances.workHour || item.Attendances.workHour <= workTime) return item
     })
 
     res.json({
       status: 'success',
-      absenceData
+      absenceData,
     })
   }
 }
-module.exports = userController
+module.exports = userController 
