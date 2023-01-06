@@ -172,6 +172,8 @@ const userController = {
         ]
       },
       include: [{ model: Attendance, where: { UserId: userId }, required: false, attributes: { exclude: ['createdAt', 'updatedAt', 'DateId'] } }],
+      raw: true,
+      nest: true
     })
 
     if (!attendedDate.length) throw new Error('年份尚未建檔！')
