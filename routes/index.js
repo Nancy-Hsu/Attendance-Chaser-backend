@@ -6,16 +6,15 @@ const { authenticatedUser } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
 const attendController = require('../controllers/attend-controller')
 
-// const passport = require('../../config/passport')
-
 router.post('/users/login', userController.logIn)
-
 router.put('/users/:userId', authenticatedUser, userController.putUser)
 router.get('/users/:userId', authenticatedUser, userController.getUser)
 router.get('/users/:userId/absence', authenticatedUser, userController.getUserAbsence)
 router.get('/currentUser', authenticatedUser, userController.getCurrentUser)
 
 router.post('/attendances', authenticatedUser, attendController.postAttendance)
+
+router.get('/users/:userId/attended', authenticatedUser, userController.getAttendDate)
 
 
 router.get('/', (req, res) => {

@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const dayjs = require('dayjs')
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const { User, Attendance, Date } = require('../models')
+const dayjs = require('dayjs')
 const loginWrongLimit = 5
 
 
@@ -110,8 +110,8 @@ const userController = {
   getUserAbsence: async (req, res, next) => {
     const user = req.user.toJSON()
     const { userId } = req.params
-
     if (user.id.toString() !== userId) throw new Error('您沒有權限')
+
     const workTime = 9
     const currentYear = dayjs().year()
     const currentMonth = dayjs().month() + 1
@@ -119,7 +119,7 @@ const userController = {
     const endOfDay = dayjs().format('YYYYMMDD')
 
     const data = await Date.findAll({
-      order: [['date', 'DESC']],
+      order: [['date', 'ASC']],
       attributes: { exclude: ['createdAt', 'updatedAt'] },
       where: {
         [Op.and]: [{ is_holiday: false },
@@ -152,6 +152,36 @@ const userController = {
       status: 'success',
       absenceData,
     })
+  },
+  getAttendDate: async(req, res) => {
+    const user = req.user.toJSON()
+    const { userId } = req.params
+    if (user.id.toString() !== userId) throw new Error('您沒有權限')
+
+    const { year, month } = req.query
+    if ( !year || !month ) throw new Error('年份或月份不存在')
+    if (month < 0 || month > 13) throw new Error('月份不正確')
+
+    const attendedDate = await Date.findAll({
+      order: [['date', 'ASC']],
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      where: {
+        [Op.and]: [
+          { date: sequelize.where(sequelize.fn('YEAR', sequelize.col('date')), year ) },
+          { date: sequelize.where(sequelize.fn('MONTH', sequelize.col('date')), month) }
+        ]
+      },
+      include: [{ model: Attendance, where: { UserId: userId }, required: false, attributes: { exclude: ['createdAt', 'updatedAt', 'DateId'] } }],
+    })
+
+    if (!attendedDate.length) throw new Error('年份尚未建檔！')
+    
+    res.json({
+      status: 'success',
+      attendedDate,
+    })
+
+
   }
 }
 module.exports = userController 
