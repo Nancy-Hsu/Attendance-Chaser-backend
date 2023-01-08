@@ -8,6 +8,7 @@ const loginWrongLimit = 5
 
 
 const userController = {
+  // POST /api/users/login
   logIn: async (req, res, next) => {
     const { account, password } = req.body
     // 檢查欄位
@@ -60,11 +61,10 @@ const userController = {
       next(err)
     }
   },
-  putUser: async (req, res, next) => {
-    // PUT /api/user/:userId
+  putUser: async (req, res) => {
+    // PUT /api/users/:userId
     const currentUser = req.user.toJSON()
     const { userId } = req.params
-
     if (currentUser.id.toString() !== userId) throw new Error('您沒有權限')
 
     const { oldPassword, newPassword, newPasswordCheck } = req.body
@@ -79,26 +79,30 @@ const userController = {
 
     if (!user || !bcrypt.compareSync(oldPassword, user.password)) throw new Error('密碼有誤！')
 
-    const result = await user.update({
+    // 變更密碼
+    await user.update({
       password: bcrypt.hashSync(newPassword, bcrypt.genSaltSync(10), null)
     })
 
-    result ? res.json({
+    res.json({
       status: 'success',
-      message: 'change succeeded !'
-    }) : res.send(500)
+      message: '密碼修改成功 !'
+    })
 
   },
-  getUser: async (req, res, next) => {
+  getUser: async (req, res) => {
+    //GET /api/users/userId
     const { userId } = req.params
     const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } })
+    if (!user) throw new Error('沒有此使用者 !')
     const userData = user.toJSON()
     res.json({
       status: 'success',
       user: userData
     })
   },
-  getCurrentUser: async (req, res, next) => {
+  getCurrentUser: async (req, res) => {
+    //GET /api/users/userId
     const currentUser = req.user.toJSON()
     delete currentUser.updatedAt
     delete currentUser.password
@@ -107,12 +111,16 @@ const userController = {
       currentUser
     })
   },
-  getUserAbsence: async (req, res, next) => {
-    const user = req.user.toJSON()
+  getUserAbsence: async (req, res) => {
+    //GET /api/users/userId/absence
+    const currentUser = req.user.toJSON()
     const { userId } = req.params
-    if (user.id.toString() !== userId) throw new Error('您沒有權限')
+    const user = await User.findByPk(userId, { raw: true })
+    if (!user) throw new Error('沒有此使用者 !')
+    if (currentUser.id.toString() !== userId) throw new Error('您沒有權限')
 
-    const workTime = 9
+    // 出勤異常設定顯示上個月到當日區間
+    const workTime = 9 
     const currentYear = dayjs().year()
     const currentMonth = dayjs().month() + 1
     const startOfDay = dayjs().startOf('month').format('YYYYMMDD')
@@ -143,7 +151,7 @@ const userController = {
       raw: true,
       nest: true
     })
-
+    // 找出資料後篩選異常資料
     const absenceData = data.filter(item => {
       if (!item.Attendances.workHour || item.Attendances.workHour <= workTime) return item
     })
@@ -154,14 +162,17 @@ const userController = {
     })
   },
   getAttendDate: async (req, res) => {
-    const user = req.user.toJSON()
+    //GET /api/users/:userId/attended?year=''&month=''
+    const currentUser = req.user.toJSON()
     const { userId } = req.params
-    if (user.id.toString() !== userId) throw new Error('您沒有權限')
-
+    if (!userId) throw new Error('您沒有權限')
+    if (currentUser.id.toString() !== userId) throw new Error('您沒有權限')
+    
     const { year, month } = req.query
     if (!year || !month) throw new Error('年份或月份不存在')
     if (month < 0 || month > 13) throw new Error('月份不正確')
 
+    // 找出該月份的日期資料以及出席資料
     const attendedDate = await Date.findAll({
       order: [['date', 'ASC']],
       attributes: { exclude: ['createdAt', 'updatedAt'] },
@@ -181,17 +192,5 @@ const userController = {
       attendedDate,
     })
   },
-  // getQRcodeInfo: (req, res) => {
-  //   const { userId } = req.param
-  //   const { timeStamp } = req.query
-  //   const currentUser = req.user.toJSON()
-  //   if (!currentUser.isAdmin) throw new Error ('您沒有權限')
-    
-
-  //   res.json({
-  //     status: 'success',
-  //     msg: 'hi',
-  //   })
-  // }
 }
 module.exports = userController 

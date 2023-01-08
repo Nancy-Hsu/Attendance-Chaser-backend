@@ -1,4 +1,3 @@
-
 const { User, Attendance, Date } = require('../models')
 const { distanceDiff } = require('../helpers/distanceDiff-helper')
 const dayjs = require('dayjs')
@@ -14,13 +13,13 @@ dayjs.extend(timezone)
 dayjs.tz.setDefault(process.env.VITE_TIME_ZONE)
 
 const attendController = {
-  postAttendance: async (req, res, next) => {
+  //打卡 QR+GPS
+  postAttendance: async (req, res) => {
     const currentUser = req.user.toJSON()
+    //判斷要為誰打卡
     const userClockIn = req?.body?.user || currentUser
     const user = await User.findByPk(userClockIn.id, { raw: true } )
     if (!user) throw new Error('沒有此使用者 !')
-
-    console.log(user)
 
     //判斷距離
     if (!user.isRemote && !currentUser.isAdmin) {
@@ -41,7 +40,6 @@ const attendController = {
 
     // 擷取日期與時間
     let { timeStamp } = req.body
-
     if (!timeStamp) throw new Error('沒有時間')
     let localTime = dayjs.tz(timeStamp, "Asia/Taipei")
    
@@ -53,9 +51,9 @@ const attendController = {
     const todayFormat = localTime.format(yearFormat)
 
     //反查日期與使用者
-    const [date, userIsTrue] = await Promise.all([Date.findOne({ where: { date: todayFormat } }), User.findByPk(user.id)])
-    if (!userIsTrue) throw new Error('沒有此使用者 !')
+    const date = await Date.findOne({ where: { date: todayFormat } })
     if (!date) throw new Error('日期有誤!')
+
     //新增打卡紀錄
     const [record, created] = await Attendance.findOrCreate({
       where: { UserId: user.id, DateId: date.id },
@@ -63,10 +61,8 @@ const attendController = {
         startTime: timeStamp
       }
     })
-
     
-    if (!created && !record.startTime) {
-
+    if (!created && record.startTime !== null) {
       if (dayjs(timeStamp).isBefore(dayjs(record.startTime)))  throw new Error ('已經打過卡')
       await record.update({ endTime: timeStamp })
     }
@@ -79,25 +75,3 @@ const attendController = {
 }
 
 module.exports = attendController
-
-
-
-
-      // client
-      //   .findPlaceFromText({
-      //     params: {
-      //       input: '新加坡商泰坦科技',
-      //       inputtype:'textquery',
-      //       fields: ['name','place_id'],
-      //       locationbias: 'Point',
-      //       language: 'zh_TW',
-      //       key: process.env.GOOGLE_KEY,
-      //     },
-      //     timeout: 5000, 
-      //   })
-      //   .then((r) => {
-      //     console.log(r.data);
-      //   })
-      //   .catch((e) => {
-      //     console.log(e.response.data.error_message);
-      //   });

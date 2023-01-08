@@ -1,4 +1,5 @@
 module.exports = {
+  //計算兩個地點距離
   distanceDiff: (origin, destination) => {
     const lats = [origin.lat, destination.lat]
     const lngs = [origin.lng, destination.lng]

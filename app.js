@@ -1,7 +1,6 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-const axios = require('axios')
 const express = require('express')
 const methodOverride = require('method-override')
 const routes = require('./routes/index.js')
