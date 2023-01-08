@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Attendance = sequelize.define('Attendance', {
     UserId: DataTypes.INTEGER,
@@ -16,4 +16,4 @@ module.exports = (sequelize, DataTypes) => {
     Attendance.belongsTo(models.User, { foreignKey: 'UserId' })
   };
   return Attendance;
-};
+}

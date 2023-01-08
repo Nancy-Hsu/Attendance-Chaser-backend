@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     account: DataTypes.STRING,
@@ -16,9 +16,9 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'User',
     tableName: 'Users',
     underscored: true,
-  });
+  })
   User.associate = function(models) {
     User.hasMany(models.Attendance, { foreignKey: 'UserId' })
-  };
-  return User;
-};
+  }
+  return User
+}

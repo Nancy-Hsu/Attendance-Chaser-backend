@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 const axios = require('axios')
 const year = 2023
@@ -17,7 +17,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    
-    return queryInterface.bulkDelete('Dates', null, {});
+    return queryInterface.bulkDelete('Dates', null, {})
   }
-};
+}

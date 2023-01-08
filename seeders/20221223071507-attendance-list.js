@@ -17,12 +17,10 @@ module.exports = {
         updated_at: workDay.date
       })))
     })
-    await queryInterface.bulkInsert('Attendances', data, {});
-
+    await queryInterface.bulkInsert('Attendances', data, {})
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Attendances', null, {});
-
+    await queryInterface.bulkDelete('Attendances', null, {})
   }
-};
+}
