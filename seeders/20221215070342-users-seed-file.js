@@ -8,7 +8,7 @@ module.exports = {
     for (let i = 1; i <= 100; i++) {
       const firstName = faker.name.firstName()
       const lastName = faker.name.lastName()
-      const avatar = `https://loremflickr.com/320/240/paris,girl/?random=${Math.random() * 100}`
+      // const avatar = `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`
 
       const employee_id = Math.floor(i / 10) === 0 ? '00000' + String(i) : Math.floor(i / 100) === 0 ? '0000' + String(i) : '000' + String(i)
       users.push({
@@ -18,7 +18,8 @@ module.exports = {
         email: lastName + firstName + '@example.com',
         name: lastName + ' ' + firstName,
         is_remote: i % 2 ? false : true,
-        avatar,
+        is_admin: i===1 ? true : false,
+        avatar: `https://loremflickr.com/320/240/people/?random=${Math.random() * 100}`,
         created_at: new Date(),
         updated_at: new Date(),
       })

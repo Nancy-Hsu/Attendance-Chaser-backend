@@ -15,12 +15,20 @@ dayjs.tz.setDefault(process.env.VITE_TIME_ZONE)
 
 const attendController = {
   postAttendance: async (req, res, next) => {
-    const user = req.user.toJSON()
+    const currentUser = req.user.toJSON()
+    const userClockIn = req?.body?.user || currentUser
+    const user = await User.findByPk(userClockIn.id, { raw: true } )
+    if (!user) throw new Error('沒有此使用者 !')
+
+    console.log(user)
+
     //判斷距離
-    if (!user.isRemote) {
+    if (!user.isRemote && !currentUser.isAdmin) {
+      const { lat, lng } = req.body
+      if (!lat || !lng) throw new Error(`請與瀏覽器分享您的位置`)
       const origin = {
-        lat: req.body.lat,
-        lng: req.body.lng
+        lat,
+        lng
       }
       const company = {
         lat: 25.05758954887687, 
@@ -57,7 +65,7 @@ const attendController = {
     })
 
     
-    if (!created && record.startTime !== null ) {
+    if (!created && !record.startTime) {
 
       if (dayjs(timeStamp).isBefore(dayjs(record.startTime)))  throw new Error ('已經打過卡')
       await record.update({ endTime: timeStamp })

@@ -14,7 +14,7 @@ router.get('/currentUser', authenticatedUser, userController.getCurrentUser)
 
 router.post('/attendances', authenticatedUser, attendController.postAttendance)
 
-router.get('/users/:userId/attended', authenticatedUser, userController.getAttendDate)
+// router.get('/users/:userId/QRcode', authenticatedUser, userController.getQRcodeInfo)
 
 
 router.get('/', (req, res) => {

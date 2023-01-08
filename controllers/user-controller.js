@@ -126,7 +126,7 @@ const userController = {
         { date: sequelize.where(sequelize.fn('YEAR', sequelize.col('date')), currentYear) },
         {
           [Op.or]: [
-            { date: { [Op.between]: [startOfDay, endOfDay] }},
+            { date: { [Op.between]: [startOfDay, endOfDay] } },
             { date: sequelize.where(sequelize.fn('month', sequelize.col('date')), currentMonth - 1) }]
         }
         ]
@@ -153,13 +153,13 @@ const userController = {
       absenceData,
     })
   },
-  getAttendDate: async(req, res) => {
+  getAttendDate: async (req, res) => {
     const user = req.user.toJSON()
     const { userId } = req.params
     if (user.id.toString() !== userId) throw new Error('您沒有權限')
 
     const { year, month } = req.query
-    if ( !year || !month ) throw new Error('年份或月份不存在')
+    if (!year || !month) throw new Error('年份或月份不存在')
     if (month < 0 || month > 13) throw new Error('月份不正確')
 
     const attendedDate = await Date.findAll({
@@ -167,7 +167,7 @@ const userController = {
       attributes: { exclude: ['createdAt', 'updatedAt'] },
       where: {
         [Op.and]: [
-          { date: sequelize.where(sequelize.fn('YEAR', sequelize.col('date')), year ) },
+          { date: sequelize.where(sequelize.fn('YEAR', sequelize.col('date')), year) },
           { date: sequelize.where(sequelize.fn('MONTH', sequelize.col('date')), month) }
         ]
       },
@@ -175,15 +175,23 @@ const userController = {
       raw: true,
       nest: true
     })
-
     if (!attendedDate.length) throw new Error('年份尚未建檔！')
-    
     res.json({
       status: 'success',
       attendedDate,
     })
+  },
+  // getQRcodeInfo: (req, res) => {
+  //   const { userId } = req.param
+  //   const { timeStamp } = req.query
+  //   const currentUser = req.user.toJSON()
+  //   if (!currentUser.isAdmin) throw new Error ('您沒有權限')
+    
 
-
-  }
+  //   res.json({
+  //     status: 'success',
+  //     msg: 'hi',
+  //   })
+  // }
 }
 module.exports = userController 
