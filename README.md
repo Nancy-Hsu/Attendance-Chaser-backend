@@ -1,5 +1,6 @@
 # Attendance-Chaser-backend 後端伺服器
-![圖片](https://user-images.githubusercontent.com/108853120/211468913-b1d04cd3-deab-467c-8f51-b51fa3e1d815.png)
+
+![圖片](https://user-images.githubusercontent.com/108853120/214905060-c538bee8-b65b-48ad-903f-567ac493de96.png)
 
 - 由此進入 [demo](https://nancy-hsu.github.io/Attendance-Chaser-frontEnd/#/login) 頁面
 - 遠端帳號： 000006，密碼： titaner ( 設定為遠端工作，可直接打卡 )
@@ -9,10 +10,10 @@
 ## 功能
 - 使用者可登入登出並修改密碼。
 - 密碼錯誤五次，帳號即上鎖 30 分鐘。
-- 首頁：遠端工作者可一鍵打卡，一般使用者需先驗證 GPS 打卡。
-- 出勤異常顯示：當月及上個月工作日中，出勤未滿 8 小時的記錄。(暫不支援跨年度)
+- 首頁：遠端工作者可一鍵打卡，一般使用者需先驗證當下 GPS 位置 ，距離公司 400 公尺內即可打卡。
+- 出勤異常顯示：當月及上個月工作日中，出勤未滿 8 小時的記錄 (含應到未到以及忘打卡)。(暫不支援跨年度)
 - 打卡只記錄當日第一次及最後一次，換日時間為上午五點 (GMT+8)。
-- QR code 打卡功能，一般使用者可產生 QRcode，管理者帳號才能解析 QRcode 並打卡。
+- QR code 打卡功能，一般使用者可產生當日 QRcode，管理者帳號才能解析 QRcode 並打卡。
 
 ## 安裝流程
 1. 請先確認有安裝 node.js 與 npm
